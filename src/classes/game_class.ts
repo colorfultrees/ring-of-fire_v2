@@ -18,4 +18,18 @@ export class Game {
         // Shuffle the stack
         shuffleArray(this.cardStack);
     }
+
+
+    /**
+     * Writes the game data into a JSON
+     * @returns JSON
+     */
+    public toJson() {
+        return {
+            players: this.players,
+            cardStack: this.cardStack,
+            playedCard: this.playedCard,
+            currentPlayer: this.currentPlayer
+        };
+    }
 }

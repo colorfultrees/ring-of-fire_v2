@@ -4,6 +4,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogAddPlayerComponent } from '../dialog-add-player/dialog-add-player.component';
 import { calcRandomNumber } from 'src/functions/aux_functions';
 import { DialogGameoverComponent } from '../dialog-gameover/dialog-gameover.component';
+import { addDoc, collectionData, Firestore } from '@angular/fire/firestore';
+import { Observable } from 'rxjs';
+import { collection, CollectionReference, doc, setDoc } from '@firebase/firestore';
+import { ActivatedRoute } from '@angular/router';
 
 
 @Component({
@@ -18,11 +22,22 @@ export class GameComponent implements OnInit{
   currentCard: string = '';
   gameOver: boolean = false;
   game: Game;
+  gameCollection: CollectionReference;
+  games$: Observable<any[]>;
 
-  constructor(public dialog: MatDialog) {}
+  constructor(public dialog: MatDialog, private firestore: Firestore, private route: ActivatedRoute) {
+    // const games = collection(firestore, 'games');
+    route.params.subscribe((params) => {
+      console.log('URL.id: ', params['id']);
+      this.gameCollection = collection(firestore, 'games');
+      this.games$ = collectionData(this.gameCollection, {idField: 'id'});
+      this.games$.subscribe((dbGames) => {console.log('Aktuelle Spiele: ', dbGames)});
+    });
+  }
 
   ngOnInit(): void {
     this.newGame();
+    this.writeToDatabase();
   }
 
 
@@ -31,6 +46,18 @@ export class GameComponent implements OnInit{
    */
   newGame() {
     this.game = new Game();
+  }
+
+
+  /**
+   * Writes the current game data to the database
+   */
+  async writeToDatabase() {
+    // const games = collection(this.firestore, 'games');
+    let doc = await addDoc(this.gameCollection, this.game.toJson());
+    console.log('Neues Dokument: ', doc);
+    console.log('Neue ID: ', doc.id);
+    // setDoc(doc(this.gameCollection), this.game.toJson());
   }
 
 
