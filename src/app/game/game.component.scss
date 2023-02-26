@@ -1,0 +1,219 @@
+$move-card-up: -30px;
+$pick-card--animation-time: 1.2s;
+
+@mixin pick-card-position() {
+    position: absolute;
+    top: $move-card-up;
+}
+
+@mixin card-transform($card-transX, $card-transY, $card-rot) {
+    transform: scale(1) translateX($card-transX) translateY($card-transY) rotate($card-rot);
+}
+
+#board {
+    width: 100%;
+    height: 100vh;
+    background-image: url('../../assets/img/wooden-table.jpg');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#card-stack {
+    position: relative;
+    margin-right: 70px;
+
+    img {
+        position: absolute;
+        width: 175px;
+    }
+
+    #top-card {
+        cursor: pointer;
+        transition: transform 160ms ease-out;
+
+        @media (hover: hover) {
+            &:hover {
+                transform: translateY($move-card-up);
+            }
+        }
+    }
+}
+
+.played-card {
+    @include pick-card-position();
+    @include card-transform(220px, -150px, -20deg);
+}
+
+.picked-card {
+    @include pick-card-position();
+    animation: pick-card-animation $pick-card--animation-time ease-in-out forwards;
+}
+
+@keyframes pick-card-animation {
+    0% {
+        transform: scale(1);
+    }
+
+    40% {
+        transform: scale(1.3);
+    }
+
+    60% {
+        transform: scale(1.3);
+    }
+
+    100% {
+        @include card-transform(220px, -150px, -20deg);
+    }
+}
+
+#players-container {
+    position: absolute;
+    top: 30px;
+    right: 0;
+    bottom: 130px;
+    padding-top: 15px;
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0 30px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+#rule-info {
+    background-color: honeydew;
+    flex-grow: 1;
+    margin-right: 30px;
+    border-radius: 15px;
+}
+
+.hidden {
+    visibility: hidden !important;
+}
+
+
+
+// *** MEDIA ***
+@media screen and (max-width: 750px) {
+    #card-stack {
+        margin-right: 100px;
+
+        img {
+            width: 135px;
+        }
+    }
+
+    .played-card {
+        @include card-transform(155px, -150px, -20deg);
+    }
+
+    .picked-card {
+        animation-name: pick-card-animation__750;
+    }
+
+    @keyframes pick-card-animation__750 {
+        0% {
+            transform: scale(1);
+        }
+    
+        40% {
+            transform: scale(1.3);
+        }
+    
+        60% {
+            transform: scale(1.3);
+        }
+    
+        100% {
+            @include card-transform(155px, -150px, -20deg);
+        }
+    }
+}
+
+@media screen and (max-width: 550px) {
+    #card-stack {
+        img {
+            width: 100px;
+        }
+    }
+
+    .played-card {
+        @include card-transform(60px, -180px, -20deg);
+    }
+
+    .picked-card {
+        animation-name: pick-card-animation__550;
+    }
+
+    @keyframes pick-card-animation__550 {
+        0% {
+            transform: scale(1);
+        }
+    
+        40% {
+            transform: scale(1.3);
+        }
+    
+        60% {
+            transform: scale(1.3);
+        }
+    
+        100% {
+            @include card-transform(60px, -180px, -20deg);
+        }
+    }
+}
+
+@media screen and (max-width: 450px) {
+    footer {
+        padding: 0 12px 12px;
+    }
+}
+
+@media screen and (max-width: 380px) {
+    #card-stack {
+        margin-right: 0;
+        margin-top: -50px
+    }
+
+    .played-card {
+        @include card-transform(0px, -180px, -20deg);
+    }
+
+    .picked-card {
+        animation-name: pick-card-animation__380;
+    }
+
+    @keyframes pick-card-animation__380 {
+        0% {
+            transform: scale(1);
+        }
+    
+        40% {
+            transform: scale(1.3);
+        }
+    
+        60% {
+            transform: scale(1.3);
+        }
+    
+        100% {
+            @include card-transform(0px, -180px, -20deg);
+        }
+    }
+}
