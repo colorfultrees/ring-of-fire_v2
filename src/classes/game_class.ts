@@ -32,4 +32,18 @@ export class Game {
             currentPlayer: this.currentPlayer
         };
     }
+
+
+    /**
+     * Sets the game data
+     * @param json The retrieved object from the database
+     */
+    public fromJson(json: any) {
+        this.players = json.players;
+        this.cardStack = json.cardStack;
+        this.playedCard = json.playedCard;
+        this.currentPlayer = json.currentPlayer;
+
+        console.log('aktualisierte Spieldaten: ', this.toJson());
+    }
 }

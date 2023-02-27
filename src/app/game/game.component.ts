@@ -4,10 +4,13 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogAddPlayerComponent } from '../dialog-add-player/dialog-add-player.component';
 import { calcRandomNumber } from 'src/functions/aux_functions';
 import { DialogGameoverComponent } from '../dialog-gameover/dialog-gameover.component';
-import { addDoc, collectionData, Firestore } from '@angular/fire/firestore';
+import { addDoc, collectionData, Firestore, getFirestore, onSnapshot } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { collection, CollectionReference, doc, setDoc } from '@firebase/firestore';
 import { ActivatedRoute } from '@angular/router';
+
+import { environment } from 'src/environments/environment';
+import { initializeApp } from '@firebase/app';
 
 
 @Component({
@@ -23,15 +26,23 @@ export class GameComponent implements OnInit{
   gameOver: boolean = false;
   game: Game;
   gameCollection: CollectionReference;
-  games$: Observable<any[]>;
+  // games$: Observable<any[]>;
+
+  app = initializeApp(environment.firebase);
+  db = getFirestore(this.app);
 
   constructor(public dialog: MatDialog, private firestore: Firestore, private route: ActivatedRoute) {
     // const games = collection(firestore, 'games');
     route.params.subscribe((params) => {
       console.log('URL.id: ', params['id']);
-      this.gameCollection = collection(firestore, 'games');
-      this.games$ = collectionData(this.gameCollection, {idField: 'id'});
-      this.games$.subscribe((dbGames) => {console.log('Aktuelle Spiele: ', dbGames)});
+      // this.gameCollection = collection(firestore, 'games');
+      // this.games$ = collectionData(this.gameCollection, {idField: 'id'});
+      // this.games$.subscribe((dbGames) => {console.log('Aktuelle Spiele: ', dbGames)});
+      this.gameCollection = collection(this.db, 'games');
+      onSnapshot(doc(this.db, 'games', params['id']), (doc) => {
+        console.log('Document data:', doc.data());
+        this.game.fromJson(doc.data());
+      });
     });
   }
 
