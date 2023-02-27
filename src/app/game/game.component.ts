@@ -4,13 +4,13 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogAddPlayerComponent } from '../dialog-add-player/dialog-add-player.component';
 import { calcRandomNumber } from 'src/functions/aux_functions';
 import { DialogGameoverComponent } from '../dialog-gameover/dialog-gameover.component';
-import { addDoc, collectionData, Firestore, getFirestore, onSnapshot } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { addDoc, collectionData, Firestore, getFirestore, onSnapshot, updateDoc } from '@angular/fire/firestore';
+// import { Observable } from 'rxjs';
 import { collection, CollectionReference, doc, setDoc } from '@firebase/firestore';
 import { ActivatedRoute } from '@angular/router';
 
-import { environment } from 'src/environments/environment';
-import { initializeApp } from '@firebase/app';
+// import { environment } from 'src/environments/environment';
+// import { initializeApp } from '@firebase/app';
 
 
 @Component({
@@ -21,25 +21,27 @@ import { initializeApp } from '@firebase/app';
 export class GameComponent implements OnInit{
   PICK_CARD_ANIMATION_TIME = 1200;
   cardStack = [0, 1, 2, 3];
-  isCardPicked = false;
-  currentCard: string = '';
   gameOver: boolean = false;
   game: Game;
+  gameId: string;
   gameCollection: CollectionReference;
   // games$: Observable<any[]>;
 
-  app = initializeApp(environment.firebase);
-  db = getFirestore(this.app);
+  // app = initializeApp(environment.firebase);
+  // db = getFirestore(this.app);
 
   constructor(public dialog: MatDialog, private firestore: Firestore, private route: ActivatedRoute) {
     // const games = collection(firestore, 'games');
     route.params.subscribe((params) => {
+
       console.log('URL.id: ', params['id']);
-      // this.gameCollection = collection(firestore, 'games');
+
+      this.gameId = params['id'];
+      this.gameCollection = collection(firestore, 'games');
       // this.games$ = collectionData(this.gameCollection, {idField: 'id'});
       // this.games$.subscribe((dbGames) => {console.log('Aktuelle Spiele: ', dbGames)});
-      this.gameCollection = collection(this.db, 'games');
-      onSnapshot(doc(this.db, 'games', params['id']), (doc) => {
+      // this.gameCollection = collection(this.db, 'games');
+      onSnapshot(doc(firestore, 'games', params['id']), (doc) => {
         console.log('Document data:', doc.data());
         this.game.fromJson(doc.data());
       });
@@ -48,7 +50,6 @@ export class GameComponent implements OnInit{
 
   ngOnInit(): void {
     this.newGame();
-    this.writeToDatabase();
   }
 
 
@@ -61,15 +62,14 @@ export class GameComponent implements OnInit{
 
 
   /**
-   * Writes the current game data to the database
+   * Updates the game data in the database
    */
-  async writeToDatabase() {
-    // const games = collection(this.firestore, 'games');
-    let doc = await addDoc(this.gameCollection, this.game.toJson());
-    console.log('Neues Dokument: ', doc);
-    console.log('Neue ID: ', doc.id);
-    // setDoc(doc(this.gameCollection), this.game.toJson());
+  updateDatabase() {
+    updateDoc(doc(this.gameCollection, this.gameId), this.game.toJson());
   }
+
+
+  
 
 
   /**
@@ -78,9 +78,10 @@ export class GameComponent implements OnInit{
   pickCard() {
     if (!this.hasPlayers()) return;
 
-    if (!this.isCardPicked) {
+    if (!this.game.isCardPicked) {
       this.setCurrentCard();
       this.isGameOver();
+      this.updateDatabase();
       
       setTimeout(() => {
         this.setPlayedCard();
@@ -111,8 +112,9 @@ export class GameComponent implements OnInit{
    * Sets the current card
    */
   setCurrentCard() {
-    this.currentCard = this.game.cardStack.pop();
-    this.isCardPicked = true;
+    this.game.currentCard = this.game.cardStack.pop();
+    this.game.isCardPicked = true;
+    // this.updateDatabase();
   }
 
 
@@ -120,8 +122,9 @@ export class GameComponent implements OnInit{
    * Sets the card on the stack of played cards
    */
   setPlayedCard() {
-    this.game.playedCard = this.currentCard;
-    this.isCardPicked = false;
+    this.game.playedCard = this.game.currentCard;
+    this.game.isCardPicked = false;
+    this.updateDatabase();
   }
 
 
@@ -131,6 +134,7 @@ export class GameComponent implements OnInit{
   setCurrentPlayer() {
     this.game.currentPlayer++;
     this.game.currentPlayer = this.game.currentPlayer % this.game.players.length;
+    this.updateDatabase();
   }
 
 
@@ -156,6 +160,7 @@ export class GameComponent implements OnInit{
     dialogRef.afterClosed().subscribe(name => {
       if (name) {
         this.game.players.push({'name': name, 'img': calcRandomNumber(1, 5)});
+        this.updateDatabase();
       }
     });
   }
@@ -170,9 +175,10 @@ export class GameComponent implements OnInit{
     dialogRef.afterClosed().subscribe(() => {
       let playersAsString = JSON.stringify(this.game.players);
       this.gameOver = false;
-      this.currentCard = '';
+      this.game.currentCard = '';
       this.newGame();
       this.game.players = JSON.parse(playersAsString);
+      this.updateDatabase();
     });
   }
 }

@@ -18,12 +18,12 @@
             [ngStyle]="{'right.px': cardStack.length * 5}" alt="played card">
 
         <!-- Animated card -->
-        <img src="assets/img/cards/{{ currentCard }}.png" *ngIf="isCardPicked" class="picked-card"
+        <img src="assets/img/cards/{{ game.currentCard }}.png" *ngIf="game.isCardPicked" class="picked-card"
             [ngStyle]="{'right.px': cardStack.length * 5}" alt="picked card">
     </div>
 
     <footer>
-        <app-card-rule id="rule-info" [card]="currentCard"></app-card-rule>
+        <app-card-rule id="rule-info" [card]="game.currentCard"></app-card-rule>
         <button id="btn-add-player" (click)="openDialog()" mat-fab color="warn" title="Add new player">
             <mat-icon>add</mat-icon>
         </button>

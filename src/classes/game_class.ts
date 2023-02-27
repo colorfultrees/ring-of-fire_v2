@@ -6,6 +6,8 @@ export class Game {
     public cardStack: string[] = [];
     public playedCard: string = '';
     public currentPlayer: number = 0;
+    public isCardPicked = false;
+    public currentCard: string = '';
 
     constructor() {
         // Fill the card stack
@@ -29,7 +31,9 @@ export class Game {
             players: this.players,
             cardStack: this.cardStack,
             playedCard: this.playedCard,
-            currentPlayer: this.currentPlayer
+            currentPlayer: this.currentPlayer,
+            currentCard: this.currentCard,
+            isCardPicked: this.isCardPicked
         };
     }
 
@@ -43,6 +47,8 @@ export class Game {
         this.cardStack = json.cardStack;
         this.playedCard = json.playedCard;
         this.currentPlayer = json.currentPlayer;
+        this.currentCard = json.currentCard;
+        this.isCardPicked = json.isCardPicked;
 
         console.log('aktualisierte Spieldaten: ', this.toJson());
     }
