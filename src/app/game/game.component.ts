@@ -4,13 +4,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogAddPlayerComponent } from '../dialog-add-player/dialog-add-player.component';
 import { calcRandomNumber } from 'src/functions/aux_functions';
 import { DialogGameoverComponent } from '../dialog-gameover/dialog-gameover.component';
-import { addDoc, collectionData, Firestore, getFirestore, onSnapshot, updateDoc } from '@angular/fire/firestore';
-// import { Observable } from 'rxjs';
-import { collection, CollectionReference, doc, setDoc } from '@firebase/firestore';
+import { deleteDoc, Firestore, onSnapshot, updateDoc } from '@angular/fire/firestore';
+import { collection, CollectionReference, doc, Unsubscribe } from '@firebase/firestore';
 import { ActivatedRoute } from '@angular/router';
-
-// import { environment } from 'src/environments/environment';
-// import { initializeApp } from '@firebase/app';
 
 
 @Component({
@@ -21,29 +17,23 @@ import { ActivatedRoute } from '@angular/router';
 export class GameComponent implements OnInit{
   PICK_CARD_ANIMATION_TIME = 1200;
   cardStack = [0, 1, 2, 3];
-  gameOver: boolean = false;
   game: Game;
   gameId: string;
   gameCollection: CollectionReference;
-  // games$: Observable<any[]>;
-
-  // app = initializeApp(environment.firebase);
-  // db = getFirestore(this.app);
+  unsubscribe: Unsubscribe;
 
   constructor(public dialog: MatDialog, private firestore: Firestore, private route: ActivatedRoute) {
-    // const games = collection(firestore, 'games');
     route.params.subscribe((params) => {
-
-      console.log('URL.id: ', params['id']);
-
       this.gameId = params['id'];
       this.gameCollection = collection(firestore, 'games');
-      // this.games$ = collectionData(this.gameCollection, {idField: 'id'});
-      // this.games$.subscribe((dbGames) => {console.log('Aktuelle Spiele: ', dbGames)});
-      // this.gameCollection = collection(this.db, 'games');
-      onSnapshot(doc(firestore, 'games', params['id']), (doc) => {
-        console.log('Document data:', doc.data());
+      this.unsubscribe = onSnapshot(doc(firestore, 'games', params['id']), (doc) => {
         this.game.fromJson(doc.data());
+        if (this.game.gameOver) {
+          this.unsubscribe();
+          setTimeout(() => {
+            this.openDialogGameOver();
+          }, this.PICK_CARD_ANIMATION_TIME + 500);
+        }
       });
     });
   }
@@ -69,9 +59,6 @@ export class GameComponent implements OnInit{
   }
 
 
-  
-
-
   /**
    * Handles the click on the top card
    */
@@ -85,7 +72,7 @@ export class GameComponent implements OnInit{
       
       setTimeout(() => {
         this.setPlayedCard();
-        if (!this.gameOver) {
+        if (!this.game.gameOver) {
           setTimeout(() => {
             this.setCurrentPlayer();
           }, 500);
@@ -114,7 +101,6 @@ export class GameComponent implements OnInit{
   setCurrentCard() {
     this.game.currentCard = this.game.cardStack.pop();
     this.game.isCardPicked = true;
-    // this.updateDatabase();
   }
 
 
@@ -143,10 +129,7 @@ export class GameComponent implements OnInit{
    */
   isGameOver() {
     if (this.game.cardStack.length == 0) {
-      this.gameOver = true;
-      setTimeout(() => {
-        this.openDialogGameOver();
-      }, this.PICK_CARD_ANIMATION_TIME + 500)
+      this.game.gameOver = true;
     }
   }
 
@@ -173,12 +156,9 @@ export class GameComponent implements OnInit{
     const dialogRef = this.dialog.open(DialogGameoverComponent);
 
     dialogRef.afterClosed().subscribe(() => {
-      let playersAsString = JSON.stringify(this.game.players);
-      this.gameOver = false;
-      this.game.currentCard = '';
-      this.newGame();
-      this.game.players = JSON.parse(playersAsString);
-      this.updateDatabase();
+      try {
+        deleteDoc(doc(this.gameCollection, this.gameId));
+      } catch {};
     });
   }
 }

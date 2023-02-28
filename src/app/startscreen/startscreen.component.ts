@@ -30,12 +30,7 @@ export class StartscreenComponent {
    * Writes the current game data to the database
    */
   async writeToDatabase() {
-    // const games = collection(this.firestore, 'games');
     let doc = await addDoc(this.gameCollection, this.game.toJson());
-    console.log('Neues Dokument: ', doc);
-    console.log('Neue ID: ', doc.id);
-    // setDoc(doc(this.gameCollection), this.game.toJson());
     return doc.id;
   }
-
 }

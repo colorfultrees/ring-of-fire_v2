@@ -2,12 +2,13 @@ import { shuffleArray } from "src/functions/aux_functions";
 
 export class Game {
     private CARD_TYPES = ['clubs', 'diamonds', 'hearts', 'spade'];
-    public players: any[] = []; // data structure: {playerName: <string>, playerImg: <number>}
+    public players: any[] = []; // data structure: {name: <string>, img: <number>}
     public cardStack: string[] = [];
     public playedCard: string = '';
     public currentPlayer: number = 0;
     public isCardPicked = false;
     public currentCard: string = '';
+    public gameOver = false;
 
     constructor() {
         // Fill the card stack
@@ -33,7 +34,8 @@ export class Game {
             playedCard: this.playedCard,
             currentPlayer: this.currentPlayer,
             currentCard: this.currentCard,
-            isCardPicked: this.isCardPicked
+            isCardPicked: this.isCardPicked,
+            isGameOver: this.gameOver
         };
     }
 
@@ -49,7 +51,6 @@ export class Game {
         this.currentPlayer = json.currentPlayer;
         this.currentCard = json.currentCard;
         this.isCardPicked = json.isCardPicked;
-
-        console.log('aktualisierte Spieldaten: ', this.toJson());
+        this.gameOver = json.isGameOver;
     }
 }

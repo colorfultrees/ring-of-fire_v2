@@ -6,11 +6,11 @@
 
     <div id="card-stack">
         <!-- Card stack -->
-        <img src="assets/img/cards/green_back.png" [class.hidden]="gameOver"
+        <img src="assets/img/cards/green_back.png" [class.hidden]="game.gameOver"
             *ngFor="let card of cardStack; let i = index;" [ngStyle]="{'right.px': i * 5}" alt="card back green">
 
         <!-- Top card -->
-        <img src="assets/img/cards/green_back.png" [class.hidden]="gameOver" class="card-transition"
+        <img src="assets/img/cards/green_back.png" [class.hidden]="game.gameOver" class="card-transition"
             (click)="pickCard()" [ngStyle]="{'right.px': cardStack.length * 5}" id="top-card" alt="card back green">
 
         <!-- Played card -->
